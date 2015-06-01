@@ -1,2 +1,2 @@
-# sbom
-Simple Binary Object Model
+# bxon
+Binary eXchange Object Notation  
