@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>385BBA05-25BD-4899-84DB-B0617D80312D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>bxon</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>851BDC574A6C5BEDC4FDF562F254799BDB3B9958</key>
+		<string>https://github.com/nczeroshift/bxon.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>project/xcode/bxon.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>851BDC574A6C5BEDC4FDF562F254799BDB3B9958</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/nczeroshift/bxon.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>851BDC574A6C5BEDC4FDF562F254799BDB3B9958</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>851BDC574A6C5BEDC4FDF562F254799BDB3B9958</string>
+			<key>IDESourceControlWCCName</key>
+			<string>bxon</string>
+		</dict>
+	</array>
+</dict>
+</plist>

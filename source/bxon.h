@@ -40,6 +40,13 @@ struct bxon_header{
 void bxon_header_init(struct bxon_header * header);
 void bxon_header_release(struct bxon_header * header);
 
+uint32_t bxon_read_string(struct bxon_context * context, struct bxon_header * header, char ** string);
+uint8_t bxon_read_int(struct bxon_context * context, struct bxon_header * header, int * value);
+uint8_t bxon_read_long(struct bxon_context * context, struct bxon_header * header, int64_t * value);
+uint8_t bxon_read_float(struct bxon_context * context, struct bxon_header * header, float * value);
+uint8_t bxon_read_double(struct bxon_context * context, struct bxon_header * header, double * value);
+uint8_t bxon_read_bool(struct bxon_context * context, struct bxon_header * header, uint8_t * value);
+
 uint8_t bxon_header_read(struct bxon_context * context, struct bxon_header * header);
 
 uint8_t bxon_parse_document(struct bxon_context * context, bxon_proto_parse_callback callback);
