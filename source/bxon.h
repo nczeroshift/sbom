@@ -13,18 +13,18 @@ typedef enum{
     BXON_OBJECT = 0,
     
     // native types
-	BXON_STRING = 1,
-	BXON_BOOLEAN = 2,
-	BXON_INT = 3,
-	BXON_LONG = 4, 
-	BXON_FLOAT = 4,
-	BXON_DOUBLE = 5,
+    BXON_STRING = 1,
+    BXON_BOOLEAN = 2,
+    BXON_INT = 3,
+    BXON_LONG = 4,
+    BXON_FLOAT = 4,
+    BXON_DOUBLE = 5,
     BXON_BYTE = 6,
     
     // available types
-	BXON_MAP = 32,
-	BXON_ARRAY = 64,
-	BXON_EXTENDED = 128,
+    BXON_MAP = 32,
+    BXON_ARRAY = 64,
+    BXON_EXTENDED = 128,
 } bxon_types;
 
 typedef enum{
@@ -59,16 +59,14 @@ struct bxon_data_map{
     void ** objects;
     int64_t * offset;
 };
-    
 
-struct bxon_object *    bxon_new        ();
 void                    bxon_release    (struct bxon_object ** obj);
 
-struct bxon_object *    bxon_new_array      (uint8_t nativeType, int initCapacity);
-void                    bxon_array_release  (struct bxon_object * obj);
+struct bxon_object *    bxon_array_new      (uint8_t nativeType, int initCapacity);
+uint8_t                 bxon_array_push      (struct bxon_object * map, struct bxon_object * obj);
 
-struct bxon_object *    bxon_new_map     (int initCapacity);
-void                    bxon_map_release (struct bxon_object * obj);
+struct bxon_object *    bxon_map_new        (int initCapacity);
+uint8_t                 bxon_map_put        (struct bxon_object * map, const char * key, struct bxon_object * obj);
 
 struct bxon_object *    bxon_new_int    (int32_t value);
 struct bxon_object *    bxon_new_long   (int64_t value);

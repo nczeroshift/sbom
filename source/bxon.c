@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct bxon_object *    bxon_new            ();
+void                    bxon_map_release    (struct bxon_object * obj);
+void                    bxon_array_release  (struct bxon_object * obj);
+
 struct bxon_object * bxon_new(){
     struct bxon_object * obj = calloc(1,sizeof(struct bxon_object));
     return obj;
@@ -20,7 +24,7 @@ void bxon_release(struct bxon_object ** obj){
     *obj = NULL;
 }
 
-struct bxon_object * bxon_new_array(uint8_t nativeType, int initCapacity){
+struct bxon_object * bxon_array_new(uint8_t nativeType, int initCapacity){
     struct bxon_object * obj = bxon_new();
     obj->header.type = BXON_ARRAY;
     struct bxon_data_array * array = (struct bxon_data_array*)calloc(sizeof(struct bxon_data_array),1);
@@ -61,7 +65,7 @@ void bxon_array_release(struct bxon_object * obj){
     obj->data = NULL;
 }
 
-struct bxon_object * bxon_new_map(int initCapacity){
+struct bxon_object * bxon_map_new(int initCapacity){
     struct bxon_object * obj = bxon_new();
     obj->header.type = BXON_MAP;
     struct bxon_data_map * map = (struct bxon_data_map*)calloc(1,sizeof(struct bxon_data_map));
@@ -195,4 +199,10 @@ int32_t bxon_get_string(struct bxon_object * obj, char ** string){
     return 0;
 }
 
+uint8_t  bxon_array_push(struct bxon_object * map, struct bxon_object * obj){
+    return 0;
+}
 
+uint8_t bxon_map_put(struct bxon_object * map, const char * key, struct bxon_object * obj){
+    return 0;
+}
