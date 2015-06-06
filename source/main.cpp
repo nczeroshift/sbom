@@ -17,7 +17,7 @@ int main(int argv, char * argc[])
     bxon_map_put(map,"float",bxon_new_float(10.000001f));
     bxon_map_put(map,"double",bxon_new_double(12.000001f));
     bxon_map_put(map,"boolean",bxon_new_bool(0));
-    bxon_map_put(map,"byte",bxon_new_bool(0));
+    bxon_map_put(map,"bool",bxon_new_bool(0));
     bxon_map_put(map,"byte",bxon_new_byte(0xFA));
 
     bxon_object * array = bxon_array_new(BXON_FLOAT,3);

@@ -36,8 +36,8 @@ typedef enum{
 #define BXON_MASK_FLAG 0xE0
 
 struct bxon_header{
-	uint32_t type;
-	uint64_t length;
+    uint32_t type;
+    uint64_t length;
 };
 
 struct bxon_object{
