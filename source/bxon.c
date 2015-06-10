@@ -80,7 +80,7 @@ struct bxon_object * bxon_new_byte(uint8_t byte){
     return obj;
 }
 
-struct bxon_object * bxon_new_string(char * string){
+struct bxon_object * bxon_new_string(const char * string){
    struct bxon_object * obj = bxon_new();
    obj->header.type = BXON_BYTE;
    obj->header.length = strlen(string);
@@ -176,8 +176,8 @@ uint32_t bxon_array_push(struct bxon_object * obj, struct bxon_object * elem){
         if(array->objects == NULL)
             array->objects = calloc(array->initCapacity,sizeof(struct bxon_object *));
 
-        if(array->size+1 == array->capacity){
-            uint64_t tmpCapacity = array->size + array->initCapacity;
+        if(array->size == array->capacity){
+            uint32_t tmpCapacity = array->size + array->initCapacity;
             void * tmp = realloc(array->objects, sizeof(struct bxon_object *) * tmpCapacity);
             if(tmp == NULL)
                 return 0;
@@ -197,8 +197,8 @@ uint32_t bxon_array_push(struct bxon_object * obj, struct bxon_object * elem){
         if(array->objects == NULL)
             array->objects = calloc(array->initCapacity,natSize);
 
-        if(array->size+1 == array->capacity){
-             uint64_t tmpCapacity = array->size + array->initCapacity;
+        if(array->size == array->capacity){
+             uint32_t tmpCapacity = array->size + array->initCapacity;
              void * tmp = realloc(array->objects, natSize * tmpCapacity);
              if(tmp == NULL)
                  return 0;
@@ -258,8 +258,11 @@ struct bxon_object * bxon_map_new(int initCapacity){
     struct bxon_object * obj = bxon_new();
     obj->header.type = BXON_MAP;
     struct bxon_data_map * map = (struct bxon_data_map*)calloc(1,sizeof(struct bxon_data_map));
+    
     obj->data = map;
-    map->capacity = initCapacity;
+    map->initCapacity = map->capacity = initCapacity;
+    map->objects = calloc(map->initCapacity, sizeof(struct bxon_object *));
+    map->keys = calloc(map->initCapacity, sizeof(char *));
     return obj;
 }
 
@@ -269,7 +272,28 @@ uint32_t bxon_map_size(struct bxon_object * obj){
 }
 
 uint32_t bxon_map_put(struct bxon_object * obj, const char * key, struct bxon_object * elem){
-    return 0;
+    struct bxon_data_map * map = (struct bxon_data_map *)obj->data;
+    
+    if(map->size == map->capacity){
+        uint32_t tmpCapacity = map->size + map->initCapacity;
+        
+        void * tmp = realloc(map->objects, sizeof(struct bxon_object *) * tmpCapacity);
+        void * tmp2 = realloc(map->keys, sizeof(char*) * tmpCapacity);
+        if(tmp == NULL || tmp2 == NULL)
+            return 0;
+        map->capacity = tmpCapacity;
+        free(map->objects);
+        free(map->keys);
+        map->objects = tmp;
+        map->keys = tmp2;
+    }
+    
+    ((struct bxon_object **)map->objects)[map->size] = elem;
+    map->keys[map->size] = strdup(key);
+    
+    map->size++;
+    
+    return map->size;
 }
 
 struct bxon_object *bxon_map_get_object(struct bxon_object * obj, const char * key){

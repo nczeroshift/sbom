@@ -46,14 +46,15 @@ struct bxon_object{
 };
 
 struct bxon_data_array{
-    uint64_t initCapacity;
-    uint64_t capacity;
-    uint64_t size;
+    uint32_t initCapacity;
+    uint32_t capacity;
+    uint32_t size;
     void * objects;
     int64_t * offset;
 };
     
 struct bxon_data_map{
+    uint32_t initCapacity;
     uint32_t capacity;
     uint32_t size;
     char ** keys;
@@ -73,7 +74,7 @@ struct bxon_object *    bxon_new_bool   (uint8_t value);
 struct bxon_object *    bxon_new_float  (float value);
 struct bxon_object *    bxon_new_double (double value);
 struct bxon_object *    bxon_new_byte   (uint8_t byte);
-struct bxon_object *    bxon_new_string (char * string);
+struct bxon_object *    bxon_new_string (const char * string);
 
 int32_t                 bxon_get_int    (struct bxon_object * obj);
 int64_t                 bxon_get_long   (struct bxon_object * obj);
