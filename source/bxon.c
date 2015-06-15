@@ -463,7 +463,7 @@ uint64_t bxon_write_map(struct bxon_object * obj, struct bxon_context * ctx){
 uint64_t bxon_write_object(struct bxon_object * obj, struct bxon_context * ctx){
     if(bxon_is_array(obj))
         return bxon_write_array(obj,ctx);
-    else if(bxon_is_array(obj))
+    else if(bxon_is_map(obj))
         return bxon_write_map(obj,ctx);
     else
         return bxon_write_native(obj,ctx);
