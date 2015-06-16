@@ -9,7 +9,6 @@
 
 uint32_t fio_read(struct bxon_context * context, int32_t size, uint8_t * d){
     FILE * f = (FILE*)context->data;
-    
     return fread((void*)d,1,(size_t)size,f);
 }
 
@@ -61,5 +60,11 @@ int main(int argv, char * argc[])
     bxon_release(&map);
 
     fclose(f);
+    
+    FILE *f2 = fopen("out.bin","rb");
+    ctx->data = f2;
+    bxon_read_object(ctx);
+    fclose(f);
+    
 	return 0;
 }

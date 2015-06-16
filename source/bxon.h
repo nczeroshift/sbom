@@ -18,13 +18,14 @@ typedef enum{
     BXON_BOOLEAN = 2,
     BXON_INT = 3,
     BXON_LONG = 4,
-    BXON_FLOAT = 4,
-    BXON_DOUBLE = 5,
-    BXON_BYTE = 6,
+    BXON_FLOAT = 5,
+    BXON_DOUBLE = 6,
+    BXON_BYTE = 7,
     
     // Flags
-    BXON_MAP = 64,
-    BXON_ARRAY = 128,
+    BXON_MAP = 32,
+    BXON_ARRAY = 64,
+    BXON_EXTENDED = 128,
 } bxon_types;
 
 typedef enum{
@@ -32,8 +33,8 @@ typedef enum{
     BXON_ERROR_ARRAY_OR_MAP_MISSING = 1
 } bxon_error;
 
-#define BXON_MASK_TYPE 0x3F
-#define BXON_MASK_FLAG 0xC0
+#define BXON_MASK_TYPE 0x1F
+#define BXON_MASK_FLAG 0xE0
 
 struct bxon_context;
 
@@ -67,7 +68,7 @@ struct bxon_data_array{
     uint32_t capacity;
     uint32_t size;
     void * objects;
-    int64_t * offset;
+    uint64_t * offset;
 };
     
 struct bxon_data_map{
@@ -76,7 +77,7 @@ struct bxon_data_map{
     uint32_t size;
     char ** keys;
     void ** objects;
-    int64_t * offset;
+    uint64_t * offset;
 };
 
 void                    bxon_release    (struct bxon_object ** obj);
@@ -113,7 +114,8 @@ struct bxon_object *    bxon_map_get_object (struct bxon_object * obj, const cha
 const char *            bxon_map_get_key    (struct bxon_object * obj, int32_t index);
 
 uint64_t                bxon_write_object   (struct bxon_object * obj, struct bxon_context * ctx);
-
+struct bxon_object * bxon_read_object(struct bxon_context * ctx);
+    
 #ifdef __cplusplus
 }
 #endif
