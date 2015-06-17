@@ -87,7 +87,7 @@ struct bxon_object * bxon_new_byte(uint8_t byte){
 
 struct bxon_object * bxon_new_string(const char * string){
    struct bxon_object * obj = bxon_new();
-   obj->header.type = BXON_BYTE;
+   obj->header.type = BXON_STRING;
    obj->header.length = strlen(string);
    obj->data = calloc(1,obj->header.length);
    memcpy(obj->data,string,obj->header.length);
@@ -148,8 +148,10 @@ uint8_t bxon_get_byte(struct bxon_object * obj){
     return *((uint8_t*)obj->data);
 }
 
-int32_t bxon_get_string(struct bxon_object * obj, char ** string){
-    return 0;
+const char * bxon_get_string(struct bxon_object * obj){
+     if((obj->header.type & BXON_MASK_TYPE) != BXON_STRING)
+         return NULL;
+    return (char*)obj->data;
 }
 
 struct bxon_object * bxon_array_new(uint8_t nativeType, uint32_t initCapacity){
@@ -232,6 +234,7 @@ struct bxon_object * bxon_array_get_object(struct bxon_object * obj, uint32_t in
         memcpy(data,array->objects+readPos,natSize);
         struct bxon_object * ret = bxon_new();
         ret->header.type = obj->header.type & BXON_MASK_TYPE;
+        ret->header.length = natSize;
         ret->data = data;
         return ret;
     }
@@ -494,7 +497,7 @@ struct bxon_object * bxon_read_map(struct bxon_context * ctx, uint8_t type, uint
         BXON_SEEK(ctx, base+map->offset[i]);
         ((struct bxon_object **)map->objects)[i] = bxon_read_object(ctx);
     }
-    
+    map->initCapacity = map->capacity = map->size = count;
     struct bxon_object * ret = bxon_new();
     ret->header.type = type;
     ret->header.length = size;
@@ -550,7 +553,7 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     struct bxon_object * ret = (struct bxon_object*)malloc(sizeof(struct bxon_object));
     ret->header.type = type;
     ret->header.length = length;
-    ret->data = malloc(length);
+    ret->data = calloc(1,type == BXON_STRING ? length+1 : length);
     
     BXON_READ(ctx,length,ret->data);
     

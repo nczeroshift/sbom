@@ -100,7 +100,7 @@ uint8_t                 bxon_get_bool   (struct bxon_object * obj);
 float                   bxon_get_float  (struct bxon_object * obj);
 double                  bxon_get_double (struct bxon_object * obj);
 uint8_t                 bxon_get_byte   (struct bxon_object * obj);
-int32_t                 bxon_get_string (struct bxon_object * obj, char ** string);
+const char *            bxon_get_string (struct bxon_object * obj);
 
 struct bxon_object *    bxon_array_new          (uint8_t nativeType, uint32_t initCapacity);
 uint32_t                bxon_array_size         (struct bxon_object * obj);
