@@ -111,7 +111,7 @@ struct bxon_object *    bxon_map_new        (uint32_t initCapacity);
 uint32_t                bxon_map_size       (struct bxon_object * obj);
 uint32_t                bxon_map_put        (struct bxon_object * obj, const char * key, struct bxon_object * elem);
 struct bxon_object *    bxon_map_get_object (struct bxon_object * obj, const char * key);
-const char *            bxon_map_get_key    (struct bxon_object * obj, int32_t index);
+const char *            bxon_map_get_key    (struct bxon_object * obj, uint32_t index);
 
 uint64_t                bxon_write_object   (struct bxon_object * obj, struct bxon_context * ctx);
 struct bxon_object * bxon_read_object(struct bxon_context * ctx);

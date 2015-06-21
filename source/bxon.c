@@ -155,9 +155,11 @@ const char * bxon_get_string(struct bxon_object * obj){
 }
 
 struct bxon_object * bxon_array_new(uint8_t nativeType, uint32_t initCapacity){
-    struct bxon_object * obj = bxon_new();
-    obj->header.type = BXON_ARRAY | BXON_EXTENDED;
-    struct bxon_data_array * array = (struct bxon_data_array*)calloc(sizeof(struct bxon_data_array),1);
+    struct bxon_object * obj;
+	struct bxon_data_array * array;
+	obj = bxon_new();
+    obj->header.type =BXON_ARRAY | BXON_EXTENDED;
+    array = (struct bxon_data_array*)calloc(sizeof(struct bxon_data_array),1);
     obj->data = array;
     if(nativeType == BXON_OBJECT || nativeType == BXON_STRING)
         array->objects = (struct bxon_data_array **)calloc(sizeof(struct bxon_data_array*),initCapacity);
@@ -195,7 +197,8 @@ uint32_t bxon_array_push(struct bxon_object * obj, struct bxon_object * elem){
         ((struct bxon_object **)array->objects)[array->size] = elem;
         array->size++;
     }else{
-        uint32_t natSize = bxon_native_size(elem->header.type & BXON_MASK_TYPE);
+        uint64_t writePos;
+		uint32_t natSize = bxon_native_size(elem->header.type & BXON_MASK_TYPE);
 
         if(!natSize)
             return 0;
@@ -213,8 +216,8 @@ uint32_t bxon_array_push(struct bxon_object * obj, struct bxon_object * elem){
              array->objects = tmp;
         }
 
-        uint64_t writePos = array->size * natSize;
-        memcpy(array->objects+writePos,elem->data,natSize);
+        writePos = array->size * natSize;
+        memcpy((uint8_t*)array->objects+writePos,elem->data,natSize);
         array->size++;
     }
     return array->size;
@@ -228,11 +231,12 @@ struct bxon_object * bxon_array_get_object(struct bxon_object * obj, uint32_t in
     if(obj->header.type == BXON_OBJECT){
         return ((struct bxon_object **)array->objects)[index];
     }else{
+		struct bxon_object * ret;
         uint32_t natSize = bxon_native_size(obj->header.type & BXON_MASK_TYPE);
         uint64_t readPos = index * natSize;
         void * data = calloc(1,natSize);
-        memcpy(data,array->objects+readPos,natSize);
-        struct bxon_object * ret = bxon_new();
+        memcpy(data,(uint8_t*)array->objects+readPos,natSize);
+        ret = bxon_new();
         ret->header.type = obj->header.type & BXON_MASK_TYPE;
         ret->header.length = natSize;
         ret->data = data;
@@ -245,8 +249,9 @@ void bxon_array_release(struct bxon_object * obj){
     struct bxon_data_array * array = obj->data;
     if(array->objects != NULL){
         if(bxon_get_type(obj) == BXON_OBJECT){
+			uint32_t i;
             struct bxon_object ** d = (struct bxon_object **)array->objects;
-            for(int32_t i = 0;i<array->size;i++){
+            for(i = 0;i<array->size;i++){
                 if(d[i] != NULL)
                     bxon_release(d+i);
             }
@@ -262,9 +267,11 @@ void bxon_array_release(struct bxon_object * obj){
 }
 
 struct bxon_object * bxon_map_new(uint32_t initCapacity){
-    struct bxon_object * obj = bxon_new();
+	struct bxon_data_map * map;
+    struct bxon_object * obj;
+	obj = bxon_new();
     obj->header.type = BXON_MAP | BXON_EXTENDED;
-    struct bxon_data_map * map = (struct bxon_data_map*)calloc(1,sizeof(struct bxon_data_map));
+    map = (struct bxon_data_map*)calloc(1,sizeof(struct bxon_data_map));
     
     obj->data = map;
     map->initCapacity = map->capacity = initCapacity;
@@ -282,10 +289,11 @@ uint32_t bxon_map_put(struct bxon_object * obj, const char * key, struct bxon_ob
     struct bxon_data_map * map = (struct bxon_data_map *)obj->data;
     
     if(map->size == map->capacity){
+		void * tmp, * tmp2;
         uint32_t tmpCapacity = map->size + map->initCapacity;
         
-        void * tmp = realloc(map->objects, sizeof(struct bxon_object *) * tmpCapacity);
-        void * tmp2 = realloc(map->keys, sizeof(char*) * tmpCapacity);
+        tmp = realloc(map->objects, sizeof(struct bxon_object *) * tmpCapacity);
+        tmp2 = realloc(map->keys, sizeof(char*) * tmpCapacity);
         if(tmp == NULL || tmp2 == NULL)
             return 0;
         map->capacity = tmpCapacity;
@@ -304,15 +312,16 @@ uint32_t bxon_map_put(struct bxon_object * obj, const char * key, struct bxon_ob
 }
 
 struct bxon_object * bxon_map_get_object(struct bxon_object * obj, const char * key){
+	uint32_t i;
     struct bxon_data_map * map = (struct bxon_data_map *)obj->data;
-     for(uint32_t i = 0; i < map->size; i++){
-         if(strcmp(map->keys[i],key) == 0)
-             return map->objects[i];
-     }
-     return NULL;
+    for(i = 0; i < map->size; i++){
+        if(strcmp(map->keys[i],key) == 0)
+            return map->objects[i];
+    }
+    return NULL;
 }
 
-const char * bxon_map_get_key(struct bxon_object * obj, int32_t index){
+const char * bxon_map_get_key(struct bxon_object * obj, uint32_t index){
     struct bxon_data_map * map = (struct bxon_data_map *)obj->data;
     if(index < map->size){
         return map->keys[index];
@@ -335,34 +344,42 @@ uint32_t bxon_native_size(uint8_t type){
 }
 
 uint64_t bxon_write_native(struct bxon_object * obj, struct bxon_context * ctx){
-    uint8_t type = obj->header.type;
+    uint32_t size;
+	uint8_t type = obj->header.type;
     BXON_WRITE(ctx,sizeof(uint8_t),&type);
-    uint32_t size = (uint32_t)obj->header.length;
+    size = (uint32_t)obj->header.length;
     if(type == BXON_STRING)
         BXON_WRITE(ctx,sizeof(uint32_t),&size);
     return BXON_WRITE(ctx,size,obj->data);
 }
 
 uint64_t bxon_write_array(struct bxon_object * obj, struct bxon_context * ctx){
-    struct bxon_data_array * array = (struct bxon_data_array *)obj->data;
+    uint8_t type;
+	uint64_t mark_start, mark_end, length;
 
-    uint8_t type = (obj->header.type & BXON_MASK_TYPE);
+	struct bxon_data_array * array = (struct bxon_data_array *)obj->data;
+
+    type = (obj->header.type & BXON_MASK_TYPE);
 
     BXON_WRITE(ctx,sizeof(uint8_t),&obj->header.type);
     BXON_WRITE(ctx,sizeof(uint64_t),&obj->header.length);
 
-    uint64_t mark_start = BXON_TELL(ctx);
+    mark_start = BXON_TELL(ctx);
 
     if(type == BXON_OBJECT){
-        BXON_WRITE(ctx,sizeof(uint32_t),&array->size);
-        for(uint32_t i = 0;i<array->size;i++){
+		uint32_t i = 0;
+		uint64_t * positions;
+        uint64_t mark_array_end;
+
+		BXON_WRITE(ctx,sizeof(uint32_t),&array->size);
+        for(i = 0;i<array->size;i++){
             uint64_t tmp = 0;
             BXON_WRITE(ctx,sizeof(uint64_t),&tmp);
         }
 
-        uint64_t * positions = (uint64_t*)calloc(array->size,sizeof(uint64_t));
+        positions = (uint64_t*)calloc(array->size,sizeof(uint64_t));
 
-        for(uint32_t i = 0;i<array->size;i++){
+        for(i = 0;i<array->size;i++){
             struct bxon_object ** o = array->objects;
             positions[i] = BXON_TELL(ctx);
             bxon_write_object(o[i],ctx);
@@ -370,10 +387,10 @@ uint64_t bxon_write_array(struct bxon_object * obj, struct bxon_context * ctx){
 
         free(positions);
 
-        uint64_t mark_array_end = BXON_TELL(ctx);
+        mark_array_end = BXON_TELL(ctx);
 
         BXON_SEEK(ctx,mark_start+sizeof(uint32_t));
-        for(uint32_t i = 0;i<array->size;i++){
+        for(i = 0;i<array->size;i++){
             uint64_t tmp = positions[i] - positions[0];
             BXON_WRITE(ctx,sizeof(uint64_t),&tmp);
         }
@@ -390,9 +407,9 @@ uint64_t bxon_write_array(struct bxon_object * obj, struct bxon_context * ctx){
         }
     }
 
-    uint64_t mark_end = BXON_TELL(ctx);
+    mark_end = BXON_TELL(ctx);
 
-    uint64_t length = mark_end - mark_start;
+    length = mark_end - mark_start;
 
     obj->header.length = length;
 
@@ -406,50 +423,54 @@ uint64_t bxon_write_array(struct bxon_object * obj, struct bxon_context * ctx){
 }
 
 uint64_t bxon_write_map(struct bxon_object * obj, struct bxon_context * ctx){
-    //uint8_t type = (obj->header.type & BXON_MASK_TYPE);
-    struct bxon_data_map * map = (struct bxon_data_map *)obj->data;
+    uint32_t i;
+	uint64_t mark_start, mark_end, length;
+	uint64_t * positions;
+	struct bxon_data_map * map;
 
+	map = (struct bxon_data_map *)obj->data;
+	
     BXON_WRITE(ctx,sizeof(uint8_t),&obj->header.type);
     BXON_WRITE(ctx,sizeof(uint64_t),&obj->header.length);
 
-    uint64_t mark_start = BXON_TELL(ctx);
+    mark_start = BXON_TELL(ctx);
 
     BXON_WRITE(ctx,sizeof(uint32_t),&map->size);
 
     // Write dummy positions
-    for(uint32_t i = 0;i<map->size;i++){
+    for(i = 0;i<map->size;i++){
        uint64_t tmp = 0;
        BXON_WRITE(ctx,sizeof(uint64_t),&tmp);
     }
 
     // Write keys
-    for(uint32_t i = 0;i<map->size;i++){
+    for(i = 0;i<map->size;i++){
         uint32_t str = strlen(map->keys[i]);
         BXON_WRITE(ctx,sizeof(uint32_t),&str);
         BXON_WRITE(ctx,str,map->keys[i]);
     }
 
     // Write objects
-    uint64_t * positions = (uint64_t*)calloc(map->size,sizeof(uint64_t));
-    for(uint32_t i = 0;i<map->size;i++){
+    positions = (uint64_t*)calloc(map->size,sizeof(uint64_t));
+    for(i = 0;i<map->size;i++){
         struct bxon_object ** o = map->objects;
         positions[i] = BXON_TELL(ctx);
         bxon_write_object(o[i],ctx);
     }
 
-    uint64_t mark_end = BXON_TELL(ctx);
+    mark_end = BXON_TELL(ctx);
 
     // Rewind to beginning and set the correct offsets
     BXON_SEEK(ctx,mark_start + sizeof(uint32_t));
 
-    for(uint32_t i = 0;i < map->size;i++){
+    for(i = 0;i < map->size;i++){
         uint64_t tmp = positions[i] - positions[0];
         BXON_WRITE(ctx,sizeof(uint64_t),&tmp);
     }
 
     free(positions);
 
-    uint64_t length = mark_end - mark_start;
+    length = mark_end - mark_start;
 
     obj->header.length = length;
 
@@ -473,32 +494,35 @@ uint64_t bxon_write_object(struct bxon_object * obj, struct bxon_context * ctx){
 }
 
 struct bxon_object * bxon_read_map(struct bxon_context * ctx, uint8_t type, uint64_t size){
-    uint32_t count;
-    
+    uint32_t i;
+	uint32_t count;
+    uint64_t base;
+	struct bxon_object * ret;
     struct bxon_data_map * map = (struct bxon_data_map *)calloc(1,sizeof(struct bxon_data_map));
     
     BXON_READ(ctx, sizeof(uint32_t), &count);
     map->offset = (uint64_t*)calloc(sizeof(uint64_t),count);
-    for(uint32_t i = 0;i<count;i++){
+    for(i = 0;i<count;i++){
         BXON_READ(ctx, sizeof(uint64_t), &map->offset[i]);
     }
     map->keys = (char**)calloc(sizeof(char*),count);
-    for(uint32_t i = 0;i<count;i++){
+    for(i = 0;i<count;i++){
         uint32_t s = 0;
+		char * str;
         BXON_READ(ctx, sizeof(uint32_t), &s);
-        char * str = (char*)calloc(1,s+1);
+        str = (char*)calloc(1,s+1);
         BXON_READ(ctx, s, str);
         map->keys[i] = str;
     }
     map->objects = calloc(sizeof(struct bxon_object*),count);
     
-    uint64_t base = BXON_TELL(ctx);
-    for(uint32_t i = 0;i<count;i++){
+    base = BXON_TELL(ctx);
+    for(i = 0;i<count;i++){
         BXON_SEEK(ctx, base+map->offset[i]);
         ((struct bxon_object **)map->objects)[i] = bxon_read_object(ctx);
     }
     map->initCapacity = map->capacity = map->size = count;
-    struct bxon_object * ret = bxon_new();
+	ret = bxon_new();
     ret->header.type = type;
     ret->header.length = size;
     ret->data = map;
@@ -508,22 +532,25 @@ struct bxon_object * bxon_read_map(struct bxon_context * ctx, uint8_t type, uint
 
 struct bxon_object * bxon_read_array(struct bxon_context * ctx, uint8_t type, uint64_t size){
     uint32_t count;
-    
+    struct bxon_object * ret;
     struct bxon_data_array * array = (struct bxon_data_array *)calloc(1,sizeof(struct bxon_data_array));
    
 
     if((type & BXON_MASK_TYPE) == BXON_OBJECT)
     {
+		uint32_t i;
+		uint64_t base;
+
         BXON_READ(ctx, sizeof(uint32_t), &count);
         
         array->offset = (uint64_t*)calloc(sizeof(uint64_t),count);
-        for(uint32_t i = 0;i<count;i++){
+        for(i = 0;i<count;i++){
             BXON_READ(ctx, sizeof(uint64_t), &array->offset[i]);
         }
         
         array->objects = calloc(sizeof(struct bxon_object*),count);
-        uint64_t base = BXON_TELL(ctx);
-        for(uint32_t i = 0;i<count;i++){
+        base = BXON_TELL(ctx);
+        for(i = 0;i<count;i++){
             BXON_SEEK(ctx, base+array->offset[i]);
             ((struct bxon_object **)array->objects)[i] = bxon_read_object(ctx);
         }
@@ -534,7 +561,7 @@ struct bxon_object * bxon_read_array(struct bxon_context * ctx, uint8_t type, ui
         BXON_READ(ctx,(uint32_t) size, array->objects);
     }
     
-    struct bxon_object * ret = bxon_new();
+    ret = bxon_new();
     ret->header.type = type;
     ret->header.length = size;
     ret->data = array;
@@ -544,13 +571,14 @@ struct bxon_object * bxon_read_array(struct bxon_context * ctx, uint8_t type, ui
 
 struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     uint32_t length;
-    
+    struct bxon_object * ret;
+
     if(type == BXON_STRING)
         BXON_READ(ctx, sizeof(uint32_t), &length);
     else
         length = bxon_native_size(type);
     
-    struct bxon_object * ret = (struct bxon_object*)malloc(sizeof(struct bxon_object));
+    ret = (struct bxon_object*)malloc(sizeof(struct bxon_object));
     ret->header.type = type;
     ret->header.length = length;
     ret->data = calloc(1,type == BXON_STRING ? length+1 : length);
@@ -563,10 +591,10 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
 
 struct bxon_object * bxon_read_object(struct bxon_context * ctx){
     uint8_t type;
-    
+    uint8_t flag;
     BXON_READ(ctx, sizeof(uint8_t), &type);
     
-    uint8_t flag = type & BXON_MASK_FLAG;
+    flag = type & BXON_MASK_FLAG;
     
     if( (flag & BXON_MAP) != 0){
         uint64_t size;
