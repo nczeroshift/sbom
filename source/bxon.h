@@ -9,32 +9,42 @@ extern "C"
 {
 #endif
     
+// Native Types
 typedef enum{
-    // Collection default type
-    BXON_OBJECT = 0,
+    BXON_STRING     = 1,
+    BXON_BOOLEAN    = 2,
+    BXON_INT        = 3,
+    BXON_LONG       = 4,
+    BXON_FLOAT      = 5,
+    BXON_DOUBLE     = 6,
+    BXON_BYTE       = 7,
+} bxon_type;
     
-    // Native types
-    BXON_STRING = 1,
-    BXON_BOOLEAN = 2,
-    BXON_INT = 3,
-    BXON_LONG = 4,
-    BXON_FLOAT = 5,
-    BXON_DOUBLE = 6,
-    BXON_BYTE = 7,
+// Length Flag
+typedef enum{
+    BXON_LENGTH_8   = 0x00,
+    BXON_LENGTH_16  = 0x10,
+    BXON_LENGTH_32  = 0x20,
+    BXON_LENGTH_64  = 0x30,
+} bxon_length;
     
-    // Flags
-    BXON_MAP = 32,
-    BXON_ARRAY = 64,
-    BXON_EXTENDED = 128,
-} bxon_types;
+// Object Flag
+typedef enum{
+    BXON_OBJECT     = 0x00,
+    BXON_ARRAY      = 0x40,
+    BXON_MAP        = 0x80,
+} bxon_flag;
 
+// Error Codes
 typedef enum{
-    BXON_ERROR_NONE = 0,
-    BXON_ERROR_ARRAY_OR_MAP_MISSING = 1
+    BXON_ERROR_NONE                 = 0,
+    BXON_ERROR_ARRAY_OR_MAP_MISSING = 1,
 } bxon_error;
 
-#define BXON_MASK_TYPE 0x1F
-#define BXON_MASK_FLAG 0xE0
+// Byte Masks
+#define BXON_MASK_TYPE      0x0F
+#define BXON_MASK_LENGTH    0x30
+#define BXON_MASK_FLAG      0xC0
 
 struct bxon_context;
 
@@ -86,6 +96,7 @@ uint8_t                 bxon_is_map     (struct bxon_object * obj);
 uint8_t                 bxon_is_array   (struct bxon_object * obj);
 uint8_t                 bxon_get_type   (struct bxon_object * obj);
 
+struct bxon_object *    bxon_new_nil    ();
 struct bxon_object *    bxon_new_int    (int32_t value);
 struct bxon_object *    bxon_new_long   (int64_t value);
 struct bxon_object *    bxon_new_bool   (uint8_t value);

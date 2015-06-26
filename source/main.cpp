@@ -128,7 +128,7 @@ int main(int argv, char * argc[])
     ctx->data = f2;
     struct bxon_object * obj = bxon_read_object(ctx);
     print_object(obj,0);
-    fclose(f);
+    fclose(f2);
     
 	return 0;
 }
