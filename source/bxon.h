@@ -11,6 +11,7 @@ extern "C"
     
 // Native Types
 typedef enum{
+    BXON_NIL        = 0,
     BXON_STRING     = 1,
     BXON_BOOLEAN    = 2,
     BXON_INT        = 3,
@@ -78,7 +79,6 @@ struct bxon_data_array{
     uint32_t capacity;
     uint32_t size;
     void * objects;
-    uint64_t * offset;
 };
     
 struct bxon_data_map{
@@ -87,7 +87,6 @@ struct bxon_data_map{
     uint32_t size;
     char ** keys;
     void ** objects;
-    uint64_t * offset;
 };
 
 void                    bxon_release    (struct bxon_object ** obj);
@@ -125,7 +124,7 @@ struct bxon_object *    bxon_map_get_object (struct bxon_object * obj, const cha
 const char *            bxon_map_get_key    (struct bxon_object * obj, uint32_t index);
 
 uint64_t                bxon_write_object   (struct bxon_object * obj, struct bxon_context * ctx);
-struct bxon_object * bxon_read_object(struct bxon_context * ctx);
+struct bxon_object *    bxon_read_object    (struct bxon_context * ctx);
     
 #ifdef __cplusplus
 }
