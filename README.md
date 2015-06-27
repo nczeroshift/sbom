@@ -29,7 +29,7 @@ Collections:
 #### Arrays
 Arrays can be constructed only with native types, this way no extra bytes are used to store arrays of float, int, etc..
 
-##Chick-and-egg problem
+##Chicken or the egg problem
 The length field range is used in **map**, **array** and **string** objects, to quantify the amount of information stored. Since it's specified in bytes, it's easy to jump to following objects without parsing the full data stream. To improve file density, this field may vary from 0 to 8 bytes depending on the amount stored, but without knowing the data and children objects size, it's not possible to write the length in advanced, in this case it's recomended to use full range (8 bytes) or compute the tree objects length. 
 
 ##Attention
