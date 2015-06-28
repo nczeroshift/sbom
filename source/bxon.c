@@ -301,7 +301,7 @@ struct bxon_object * bxon_array_get_object(struct bxon_object * obj, uint32_t in
     if(index >= array->size)
         return NULL;
 
-    if(obj->header.type == BXON_OBJECT){
+    if((obj->header.type & BXON_MASK_TYPE) == BXON_NIL){
         return ((struct bxon_object **)array->objects)[index];
     }else{
         struct bxon_object * ret;
@@ -630,7 +630,7 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     uint32_t length;
     struct bxon_object * ret;
 
-    if(type == BXON_STRING)
+    if((type & BXON_MASK_TYPE) == BXON_STRING)
         length = bxon_read_length(ctx,type);
     else
         length = bxon_native_size(type);
