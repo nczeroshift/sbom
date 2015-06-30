@@ -408,7 +408,7 @@ void bxon_map_release(struct bxon_object * obj){
         struct bxon_object ** d = (struct bxon_object **)map->objects;
         for(i = 0;i<map->size;i++)
             bxon_release(d+i);
-        free(map->objects[i]);
+        free(map->objects);
     }
 
     map->keys = NULL;

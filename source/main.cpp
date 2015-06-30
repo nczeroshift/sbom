@@ -101,7 +101,9 @@ int main(int argv, char * argc[])
     ctx->seek = fio_seek;
     ctx->tell = fio_tell;
 
-    /*FILE *f = fopen("out.bin","wb");
+#define FILE_PATH "../../../../out.bxon"
+    
+    FILE *f = fopen(FILE_PATH,"wb");
     ctx->data = f;
     bxon_object * map = bxon_map_new(10);
 
@@ -136,9 +138,9 @@ int main(int argv, char * argc[])
 
     bxon_release(&map);
 
-    fclose(f);*/
+    fclose(f);
 
-    FILE *f2 = fopen("temp.bxon","rb");
+    FILE *f2 = fopen(FILE_PATH,"rb");
     ctx->data = f2;
     struct bxon_object * obj = bxon_read_object(ctx);
     print_object(obj,0);
