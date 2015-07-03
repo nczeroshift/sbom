@@ -57,8 +57,7 @@ class bxon_context(object):
         elif(t == BXON_LONG):
             self.write("<q",val) 
         elif(t == BXON_FLOAT):
-            self.write("<f",val) 
-            #print("float")
+            self.write("<f",val)
         elif(t == BXON_DOUBLE):
             self.write("<d",val) 
         elif(t == BXON_BYTE):
@@ -105,14 +104,14 @@ class bxon_map(object):
     context = None
     startPos = None
     endPos = None
-    #map = {}
+    map = {}
 
     def __init__(self,ctx=None):
         self.parent = None
         self.context = ctx
         self.startPos = None
         self.endPos = None
-        #self.map = {}
+        self.map = {}
 
     def write(self,p=None):
         if(p!=None):
@@ -126,11 +125,6 @@ class bxon_map(object):
 
     def _update(self):
         self.endPos = self.context.tell()
-        lenght = self.endPos - self.startPos;
-        self.context.seek(self.startPos-8);
-        self.context.write("<q",lenght)
-        self.context.seek(self.endPos);
-        
         if(self.parent != None ):
             self.parent._update();
             
@@ -141,10 +135,21 @@ class bxon_map(object):
         if type(vObj) is bxon_native:
             vObj.write(self.context)
         else:
+            self.map[key] = vObj;
             vObj.write(self)
-        #self.map[key] = vObj;
+
         self._update();
+        
         return vObj;
+
+    def flush(self):
+        for i in self.map:
+            self.map[i].flush();
+    
+        lenght = self.endPos - self.startPos;
+        self.context.seek(self.startPos-8);
+        self.context.write("<q",lenght)
+        self.context.seek(self.endPos);
 
 class bxon_array(object):
     parent = None
@@ -154,14 +159,16 @@ class bxon_array(object):
     nativeType = BXON_NIL
     nativeCount = 0
     nativeIndex = 0
+    array = []
     
-    #array = []
     def __init__(self,ctx=None,nType=BXON_NIL,nCount=0):
         self.parent = None
         self.context = ctx
         self.startPos = None
         self.endPos = None
         self.nativeType = BXON_NIL;
+        self.array = []
+        
         if(nType!=BXON_NIL and nType!=BXON_STRING):
             self.nativeType = nType
             self.nativeCount = nCount
@@ -176,48 +183,41 @@ class bxon_array(object):
             self.context.write("<B",BXON_ARRAY|BXON_LENGTH_64|self.nativeType)
             self.context.write("<q",0)
             self.startPos = self.context.tell()
-            if(self.nativeType != BXON_NIL):
-                totalBytes = self.nativeCount * self.context.lengthForNative(self.nativeType)
-                #print("total size",totalBytes)
-                #for i in range (totalBytes):
-                #    self.context.write("<B",0)
-                  
+    
     def _update(self):
-    	
-    	"""
         self.endPos = self.context.tell()
-        lenght = self.endPos - self.startPos;
-        self.context.seek(self.startPos-8);
-        self.context.write("<q",lenght)
-        #print(lenght)
-        self.context.seek(self.endPos);
         if(self.parent != None ):
+            
             self.parent._update();
-        """
     def push(self, obj):
         self.write()
         if self.nativeType != BXON_NIL:    
             pos = self.startPos + self.nativeIndex * self.context.lengthForNative(self.nativeType)
             if pos!=self.context.tell():
                 self.context.seek(pos)
-                #print("seek to",pos)
-            
             if type(obj) == bxon_native:
                 self.context.writeNative(self.nativeType,obj.value)
             else:
                 self.context.writeNative(self.nativeType,obj)
             self.nativeIndex+=1
-            
-            #self.context.writeNative(BXON_FLOAT,obj.value)
         else:
             self.write()
             if type(obj) is bxon_native:
                 obj.write(self.context)
             else:
+                self.array.append(obj);
                 obj.write(self)
-            #self.array.append(obj);
         self._update()
         return obj
+
+    def flush(self):
+        for i in range(len(self.array)):
+            self.array[i].flush();
+
+        lenght = self.endPos - self.startPos;
+        self.context.seek(self.startPos-8);
+        self.context.write("<q",lenght)
+        self.context.seek(self.endPos);
 
 def test():
     start_time = time.time()
@@ -228,8 +228,7 @@ def test():
     f.close()
     elapsed_time = time.time() - start_time
     print(elapsed_time)
-    
-    
+
     
     start_time = time.time()
     f = open("../out.bxon","wb")
@@ -237,10 +236,10 @@ def test():
 
     root = bxon_map(ctx)
 
-    #root.put("temp1", bxon_native(BXON_INT,10))
-    #root.put("temp2", bxon_native(BXON_FLOAT,10.0))
-    #root.put("temp3", bxon_native(BXON_DOUBLE,12.0))
-    #root.put("temp4", bxon_native(BXON_STRING,"test string!"))
+    root.put("temp1", bxon_native(BXON_INT,10))
+    root.put("temp2", bxon_native(BXON_FLOAT,10.0))
+    root.put("temp3", bxon_native(BXON_DOUBLE,12.0))
+    root.put("temp4", bxon_native(BXON_STRING,"test string!"))
 
     array = root.put("array",bxon_array(nType=BXON_FLOAT,nCount = 30000))
     
@@ -248,11 +247,10 @@ def test():
     	array.push(bxon_native(BXON_FLOAT,i));
     	array.push(bxon_native(BXON_FLOAT,i*3));
     	array.push(bxon_native(BXON_FLOAT,i*6));
-    	
-    #array.push(bxon_native(BXON_FLOAT,2.0));
-    #array.push(bxon_native(BXON_FLOAT,3.0));
 
-    #root.put("bool_5", bxon_native(BXON_BOOLEAN,True))
+    root.put("bool_5", bxon_native(BXON_BOOLEAN,True))
+    root.flush();
+
     elapsed_time = time.time() - start_time
     print(elapsed_time)
     
