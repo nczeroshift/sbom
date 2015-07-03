@@ -588,7 +588,7 @@ struct bxon_object * bxon_read_array(struct bxon_context * ctx, uint8_t type){
 
     array = (struct bxon_data_array *)calloc(1,sizeof(struct bxon_data_array));
 
-    if((type & BXON_MASK_TYPE) == BXON_OBJECT)
+    if((type & BXON_MASK_TYPE) == BXON_NIL)
     {
         uint32_t i = 0, capacity = BXON_INIT_CAPACITY;
         uint64_t base = 0, pos = 0;

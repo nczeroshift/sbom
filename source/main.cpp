@@ -103,7 +103,7 @@ int main(int argv, char * argc[])
 
 #define FILE_PATH "../../../../out.bxon"
     
-    FILE *f = fopen(FILE_PATH,"wb");
+    /*FILE *f = fopen(FILE_PATH,"wb");
     ctx->data = f;
     bxon_object * map = bxon_map_new(10);
 
@@ -138,7 +138,7 @@ int main(int argv, char * argc[])
 
     bxon_release(&map);
 
-    fclose(f);
+    fclose(f);*/
 
     FILE *f2 = fopen(FILE_PATH,"rb");
     ctx->data = f2;
