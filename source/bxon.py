@@ -1,6 +1,9 @@
+#!/usr/local/bin/python
+# -*- coding: utf-8 -*-
+
 #BXON Python "Direct to File" Writer
 
-import struct, time, sys, os, math
+import struct, time, sys, os, math, codecs
 
 BXON_NIL        = 0
 BXON_STRING     = 1
@@ -74,10 +77,10 @@ class bxon_native(object):
             ctx.write("<B",BXON_NIL)
         elif self.type == BXON_STRING:
             ctx.write("<B",BXON_STRING | BXON_LENGTH_32)
-            data = self.value.encode("utf-8");
+            data = self.value.encode('utf-8',"replace");
             ctx.write("<i",len(data))
             for c in data:
-                ctx.file.write(struct.pack("<b",c))
+                ctx.file.write(struct.pack("<B",ord(c)))
         elif self.type == BXON_BOOLEAN: 
             ctx.write("<B",BXON_BOOLEAN) 
             ctx.write("<B",self.value) 
@@ -221,7 +224,7 @@ def test():
     root = bxon_map(ctx)
 
     # Test writing of default objects
-    root.put("int_0", bxon_native(BXON_INT, 10))
+    root.put(u"int_0é", bxon_native(BXON_INT, 10))
     root.put("long_1", bxon_native(BXON_LONG, 100000000))
     root.put("float_2", bxon_native(BXON_FLOAT, 10.0))
     root.put("double_3", bxon_native(BXON_DOUBLE, 12.0))
