@@ -551,15 +551,17 @@ struct bxon_object * bxon_read_map(struct bxon_context * ctx, uint8_t type){
     pos = base = BXON_TELL(ctx);
 
     for(i = 0; pos-base < size;i++){
-        if(i >= capacity){
+		uint8_t keyFlag;
+        struct bxon_object * key;
+
+		if(i >= capacity){
             capacity += BXON_INIT_CAPACITY;
             map->keys = (char**)realloc(map->keys,sizeof(char*) * capacity);
             map->objects = realloc(map->objects,sizeof(struct bxon_object*) * capacity);
         }
-
-        uint8_t keyFlag;
+       
         BXON_READ(ctx,sizeof(uint8_t),&keyFlag);
-        struct bxon_object * key = bxon_read_native(ctx, keyFlag);
+		key = bxon_read_native(ctx, keyFlag);
         map->keys[i] = strdup(key->data);
         bxon_release(&key);
 
@@ -641,7 +643,7 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     ret->data = NULL;
     
     if(length > 0){
-        ret->data = calloc(1,type == BXON_STRING ? length+1 : length);
+        ret->data = calloc(1,(type & BXON_MASK_TYPE) == BXON_STRING ? length+1 : length);
         BXON_READ(ctx,length,ret->data);
     }
     
