@@ -3,7 +3,7 @@
 *"Sean Connery binary JSON"*
 
 ##About
-This project is quick and simple specification to read and write **binary** data in a **JSON** fashion, it's based on **mp4 atom** structure and tries to offer a way to retreive data without full parsing.
+This project is a quick and simple specification to read and write **binary** data in a **JSON** fashion, it's based on **mp4 atom** structure and tries to offer a way to retreive data without full parsing.
 
 ##Structure
 Each object contains an header and data. In the header is stored the type tag and length. In data is stored object contents, which may be native or other objects.
