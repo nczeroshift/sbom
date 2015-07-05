@@ -77,10 +77,10 @@ class bxon_native(object):
             ctx.write("<B",BXON_NIL)
         elif self.type == BXON_STRING:
             ctx.write("<B",BXON_STRING | BXON_LENGTH_32)
-            data = self.value.encode('utf-8',"replace");
+            data = bytearray(self.value.encode('utf-8'));
             ctx.write("<i",len(data))
             for c in data:
-                ctx.file.write(struct.pack("<B",ord(c)))
+                ctx.file.write(struct.pack("<B",c))
         elif self.type == BXON_BOOLEAN: 
             ctx.write("<B",BXON_BOOLEAN) 
             ctx.write("<B",self.value) 
