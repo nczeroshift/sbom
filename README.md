@@ -19,7 +19,7 @@ BXON_STRING|1| Native type
 BXON_BOOLEAN| 2| Native type
 BXON_INT|3| Native type
 BXON_LONG|4| Native type
-BXON_FLOA|5| Native type
+BXON_FLOAT|5| Native type
 BXON_DOUBLE|6| Native type
 BXON_BYTE| 7| Native type
 BXON_LENGTH_8|0x00| Length field size
