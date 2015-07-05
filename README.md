@@ -57,7 +57,7 @@ Arrays can be constructed only with native types, this way it uses no extra byte
 
 Type | Structure
 ---- | ---------
-array | [ header (1 byte), length(0-8 bytes), data (N * len(int,float,double,byte,etc...)]
+array | [ header (1 byte), length(0-8 bytes), data (N * len(int,float,double,byte,etc...))]
 
 ##Attention
 This a work in progress, specification may not be final.
