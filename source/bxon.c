@@ -301,7 +301,7 @@ struct bxon_object * bxon_array_get_object(struct bxon_object * obj, uint32_t in
     if(index >= array->size)
         return NULL;
 
-    if(obj->header.type == BXON_OBJECT){
+    if((obj->header.type & BXON_MASK_TYPE) == BXON_NIL){
         return ((struct bxon_object **)array->objects)[index];
     }else{
         struct bxon_object * ret;
@@ -408,7 +408,7 @@ void bxon_map_release(struct bxon_object * obj){
         struct bxon_object ** d = (struct bxon_object **)map->objects;
         for(i = 0;i<map->size;i++)
             bxon_release(d+i);
-        free(map->objects[i]);
+        free(map->objects);
     }
 
     map->keys = NULL;
@@ -551,15 +551,17 @@ struct bxon_object * bxon_read_map(struct bxon_context * ctx, uint8_t type){
     pos = base = BXON_TELL(ctx);
 
     for(i = 0; pos-base < size;i++){
-        if(i >= capacity){
+		uint8_t keyFlag;
+        struct bxon_object * key;
+
+		if(i >= capacity){
             capacity += BXON_INIT_CAPACITY;
             map->keys = (char**)realloc(map->keys,sizeof(char*) * capacity);
             map->objects = realloc(map->objects,sizeof(struct bxon_object*) * capacity);
         }
-
-        uint8_t keyFlag;
+       
         BXON_READ(ctx,sizeof(uint8_t),&keyFlag);
-        struct bxon_object * key = bxon_read_native(ctx, keyFlag);
+		key = bxon_read_native(ctx, keyFlag);
         map->keys[i] = strdup(key->data);
         bxon_release(&key);
 
@@ -588,7 +590,7 @@ struct bxon_object * bxon_read_array(struct bxon_context * ctx, uint8_t type){
 
     array = (struct bxon_data_array *)calloc(1,sizeof(struct bxon_data_array));
 
-    if((type & BXON_MASK_TYPE) == BXON_OBJECT)
+    if((type & BXON_MASK_TYPE) == BXON_NIL)
     {
         uint32_t i = 0, capacity = BXON_INIT_CAPACITY;
         uint64_t base = 0, pos = 0;
@@ -630,7 +632,7 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     uint32_t length;
     struct bxon_object * ret;
 
-    if(type == BXON_STRING)
+    if((type & BXON_MASK_TYPE) == BXON_STRING)
         length = bxon_read_length(ctx,type);
     else
         length = bxon_native_size(type);
@@ -641,7 +643,7 @@ struct bxon_object * bxon_read_native(struct bxon_context * ctx, uint8_t type){
     ret->data = NULL;
     
     if(length > 0){
-        ret->data = calloc(1,type == BXON_STRING ? length+1 : length);
+        ret->data = calloc(1,(type & BXON_MASK_TYPE) == BXON_STRING ? length+1 : length);
         BXON_READ(ctx,length,ret->data);
     }
     
