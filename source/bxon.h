@@ -1,4 +1,13 @@
 
+/**
+ * BXON - Binary eXchange Object Notation
+ * Under MIT License
+ * Copyright © Luís F. Loureiro
+ * https://github.com/nczeroshift/bxon
+ * Version ??.??.??
+ * 2015-08-05
+ */
+
 #ifndef BXON_H_
 #define BXON_H_
 
