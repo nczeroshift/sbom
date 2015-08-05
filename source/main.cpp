@@ -1,4 +1,13 @@
 
+/**
+ * BXON - Binary eXchange Object Notation
+ * Under MIT License
+ * Copyright © Luís F. Loureiro
+ * https://github.com/nczeroshift/bxon
+ * Version ??.??.??
+ * 2015-08-05
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,32 +15,69 @@
 #include <string>
 
 #include "bxon.h"
+#include "bxon.hpp"
 
-uint32_t fio_read(struct bxon_context * context, int32_t size, uint8_t * d){
+uint32_t cFIORead(struct bxon_context * context, int32_t size, uint8_t * d){
     FILE * f = (FILE*)context->data;
     return fread((void*)d,1,(size_t)size,f);
 }
 
-uint32_t fio_write(struct bxon_context * context, int32_t size, uint8_t * d){
+uint32_t cFIOWrite(struct bxon_context * context, int32_t size, uint8_t * d){
     FILE * f = (FILE*)context->data;
     return fwrite((void*)d,1,(size_t)size,f);
 }
 
-uint64_t fio_seek(struct bxon_context * context, int64_t offset){
+uint64_t cFIOSeek(struct bxon_context * context, int64_t offset){
     FILE * f = (FILE*)context->data;
     return fseek(f,offset,SEEK_SET);
 }
 
-uint64_t fio_tell(struct bxon_context * context){
+uint64_t cFIOTell(struct bxon_context * context){
     FILE * f = (FILE*)context->data;
     return ftell(f);
 }
+
+
+class cppFIOContext : public BXON::Context{
+public:
+    cppFIOContext(std::string filename){
+        file = fopen(filename.c_str(),"rb");
+    }
+    
+    virtual ~cppFIOContext(){
+        if(file!=NULL)
+            fclose(file);
+    }
+    
+    uint32_t Read(int32_t size, uint8_t * d){
+       if(fread((void*)d, 1, (size_t)size, file)==size)
+           return size;
+        return 0;
+    }
+    
+    uint32_t Write(int32_t size, uint8_t * d){
+        if(fwrite((void*)d, 1, (size_t)size, file)==size)
+            return size;
+        return 0;
+    }
+    
+    uint64_t Seek(int64_t offset){
+        return fseek(file, offset, SEEK_SET);
+    }
+    
+    uint64_t Tell(){
+        return ftell(file);
+    }
+    
+protected:
+    FILE * file;
+};
 
 void printspaces(int depth){
     for(int i = 0;i<depth*4;i++)
         printf(" ");
 }
-void print_object(struct bxon_object * obj , int depth){
+void cPrintObject(struct bxon_object * obj , int depth = 0){
     if(bxon_is_array(obj)){
         printf("[\n");
 
@@ -40,7 +86,7 @@ void print_object(struct bxon_object * obj , int depth){
             if(i>0)
                 printf(",");
             struct bxon_object * obj2 = bxon_array_get_object(obj, i);
-            print_object(obj2,depth+1);
+            cPrintObject(obj2,depth+1);
         }
 
         printspaces(depth);printf("]\n");
@@ -55,7 +101,7 @@ void print_object(struct bxon_object * obj , int depth){
             const char * key = bxon_map_get_key(obj, i);
             printf("\"%s\":",key);
             struct bxon_object * obj2 = bxon_map_get_object(obj, key);
-            print_object(obj2,depth+1);
+            cPrintObject(obj2,depth+1);
         }
         printspaces(depth);printf("}\n");
     }else{
@@ -89,15 +135,111 @@ void print_object(struct bxon_object * obj , int depth){
     }
 }
 
-#define TEST_FILE_PATH "test.bxon"
 
-void write_test(){
+void cppPrintObject(BXON::Object * obj, int depth = 0){
+    BXON::Array * array=NULL;
+    BXON::Map * map = NULL;
+    BXON::Native * native = NULL;
+    
+    if((array = dynamic_cast<BXON::Array*>(obj)) != NULL){
+        printf("[\n");
+        if(array->GetType()){
+            int columns = 0;
+            if(array->GetSize() % 3 == 0)
+                columns = 3;
+            else if(array->GetSize() % 4 == 0)
+                columns = 4;
+            
+            for(int i = 0, c = 0;i<array->GetSize();i++){
+                if(c == 0)
+                    printspaces(depth+1);
+                
+                if(i>0)
+                    printf(",");
+                if(array->GetType() == BXON::TYPE_INT){
+                    printf("%d",array->GetInteger(i));
+                }else if(array->GetType() == BXON::TYPE_LONG){
+                    printf("%lld",array->GetLong(i));
+                }else if(array->GetType() == BXON::TYPE_FLOAT){
+                    printf("%f",array->GetFloat(i));
+                }else if(array->GetType() == BXON::TYPE_DOUBLE){
+                    printf("%f",array->GetDouble(i));
+                }else if(array->GetType() == BXON::TYPE_BYTE){
+                    printf("0x%x",array->GetByte(i));
+                }else if(array->GetType() == BXON::TYPE_BOOLEAN){
+                    printf("%s",native->GetBoolean()?"true":"false");
+                }
+                
+                if(c >= columns-1){
+                    c = 0;
+                    printf("\n");
+                }else
+                    c++;
+            }
+        }else{
+            for(int i = 0;i<array->GetSize();i++){
+                BXON::Object * nObj = array->GetObject(i);
+                printspaces(depth+1);
+                if(i>0)
+                    printf(",");
+                if(obj!=NULL)
+                    cppPrintObject(nObj,depth+1);
+                else
+                    printf("null");
+            }
+        }
+        printspaces(depth+1);printf("]\n");
+    }else if((map = dynamic_cast<BXON::Map*>(obj)) != NULL){
+        printf("{\n");
+        std::vector<std::string> keys = map->GetKeys();
+        for(int i = 0;i<map->GetSize();i++){
+            printspaces(depth+1);
+            if(i>0)
+                printf(",");
+            printf("\"%s\":",keys[i].c_str());
+            BXON::Object * nObj = map->GetObject(keys[i]);
+            cppPrintObject(nObj,depth+1);
+        }
+        printspaces(depth);printf("}\n");
+    }else if((native = dynamic_cast<BXON::Native*>(obj)) != NULL){
+        
+        if(native->GetType() == BXON::TYPE_NIL){
+            printf("nil\n");
+        }
+        else if(native->GetType() == BXON::TYPE_STRING){
+            printf("\"%s\"\n",native->GetString().c_str());
+        }
+        else if(native->GetType() == BXON::TYPE_INT){
+            printf("%d\n",native->GetInt());
+        }
+        else if(native->GetType() == BXON::TYPE_LONG){
+            printf("%lld\n",native->GetLong());
+        }
+        else if(native->GetType() == BXON::TYPE_BOOLEAN){
+            printf("%s\n",native->GetBoolean()?"true":"false");
+        }
+        else if(native->GetType() == BXON::TYPE_BYTE){
+            printf("0x%x\n",native->GetByte());
+        }
+        else if(native->GetType() == BXON::TYPE_FLOAT){
+            printf("%f\n",native->GetFloat());
+        }
+        else if(native->GetType() == BXON::TYPE_DOUBLE){
+            printf("%f\n",native->GetDouble());
+        }
+    }
+}
+
+
+#define TEST_FILE_PATH "../../../../test.bxon"
+
+void cWriteTest(){
 	// Init context
 	bxon_context ctx;
-    ctx.read = fio_read;
-    ctx.write = fio_write;
-    ctx.seek = fio_seek;
-    ctx.tell = fio_tell;
+    ctx.read = cFIORead;
+    ctx.write = cFIOWrite;
+    ctx.seek = cFIOSeek;
+    ctx.tell = cFIOTell;
 
 	// Open file to writing and assing to context
 	FILE *f = fopen(TEST_FILE_PATH,"wb");
@@ -139,13 +281,13 @@ void write_test(){
     fclose(f);
 }
 
-void read_test(){
+void cReadTest(){
 	// Init context
 	bxon_context ctx;
-	ctx.read = fio_read;
-    ctx.write = fio_write;
-    ctx.seek = fio_seek;
-    ctx.tell = fio_tell;
+	ctx.read = cFIORead;
+    ctx.write = cFIOWrite;
+    ctx.seek = cFIOSeek;
+    ctx.tell = cFIOTell;
 
 	FILE *f2 = fopen(TEST_FILE_PATH,"rb");
 	if(!f2){
@@ -155,15 +297,33 @@ void read_test(){
 
     ctx.data = f2;
     struct bxon_object * obj = bxon_read_object(&ctx);
-    print_object(obj,0);
+    cPrintObject(obj);
     fclose(f2);
 }
 
+void cppReadTest(){
+    cppFIOContext * ctx = new cppFIOContext(TEST_FILE_PATH);
+    
+    try{
+        BXON::Object * root = BXON::Object::Parse(ctx);
+        if(root!=NULL){
+            cppPrintObject(root);
+            delete root;
+        }
+    }catch(int e){
+        printf("Exception %d",e);
+    }
+    
+    delete ctx;
+}
+
+
 int main(int argv, char * argc[])
 {
-	write_test();
-	read_test();
-
+	cWriteTest();
+	cReadTest();
+    cppReadTest();
+    
 #ifdef _DEBUG && _WIN32 
 	system("pause");
 #endif

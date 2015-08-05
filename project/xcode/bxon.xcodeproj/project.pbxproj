@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CC6410A81B1D982D006626CD /* bxon.c in Sources */ = {isa = PBXBuildFile; fileRef = CC6410A51B1D982D006626CD /* bxon.c */; };
+		CC431F431B72B547004BD7D9 /* bxon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC431F411B72B547004BD7D9 /* bxon.cpp */; };
 		CC6410A91B1D982D006626CD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC6410A71B1D982D006626CD /* main.cpp */; };
+		CCABFBBC1B30C026009A817A /* bxon.c in Sources */ = {isa = PBXBuildFile; fileRef = CC6410A51B1D982D006626CD /* bxon.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CC431F411B72B547004BD7D9 /* bxon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bxon.cpp; path = ../../../source/bxon.cpp; sourceTree = "<group>"; };
+		CC431F421B72B547004BD7D9 /* bxon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = bxon.hpp; path = ../../../source/bxon.hpp; sourceTree = "<group>"; };
 		CC64109B1B1D97FF006626CD /* bxon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = bxon; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC6410A51B1D982D006626CD /* bxon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bxon.c; path = ../../../source/bxon.c; sourceTree = "<group>"; };
 		CC6410A61B1D982D006626CD /* bxon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bxon.h; path = ../../../source/bxon.h; sourceTree = "<group>"; };
@@ -62,6 +65,8 @@
 			children = (
 				CC6410A51B1D982D006626CD /* bxon.c */,
 				CC6410A61B1D982D006626CD /* bxon.h */,
+				CC431F411B72B547004BD7D9 /* bxon.cpp */,
+				CC431F421B72B547004BD7D9 /* bxon.hpp */,
 				CC6410A71B1D982D006626CD /* main.cpp */,
 			);
 			path = bxon;
@@ -123,8 +128,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCABFBBC1B30C026009A817A /* bxon.c in Sources */,
 				CC6410A91B1D982D006626CD /* main.cpp in Sources */,
-				CC6410A81B1D982D006626CD /* bxon.c in Sources */,
+				CC431F431B72B547004BD7D9 /* bxon.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
