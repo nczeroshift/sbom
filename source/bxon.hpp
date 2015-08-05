@@ -1,7 +1,7 @@
 
 /**
  * BXON - Binary eXchange Object Notation
- * Under MIT License 
+ * Under MIT License
  * Copyright © Luís F. Loureiro
  * https://github.com/nczeroshift/bxon
  * Version ??.??.??
@@ -32,7 +32,7 @@ typedef enum{
     TYPE_DOUBLE     = 6,
     TYPE_BYTE       = 7,
 } NativeType;
-    
+
 // Length Flag
 typedef enum{
     LENGTH_8   = 0x00,
@@ -40,7 +40,7 @@ typedef enum{
     LENGTH_32  = 0x20,
     LENGTH_64  = 0x30,
 } LengthFlag;
-    
+
 // Object Flag
 typedef enum{
     FLAG_OBJECT     = 0x00,
@@ -50,7 +50,7 @@ typedef enum{
 
 // Exception Codes
 typedef enum{
-	EXCEPTION_WRONG_TYPE		   = 1,
+    EXCEPTION_WRONG_TYPE		   = 1,
     EXCEPTION_ARRAY_OUT_OF_BOUNDS  = 2,
     EXCEPTION_ARRAY_NULL_ENTRY     = 3,
     EXCEPTION_READ_FAILURE         = 4,
@@ -172,7 +172,7 @@ public:
     virtual float GetFloat (int i) = 0;
     virtual double GetDouble (int i) = 0;
     virtual std::string GetString (int i) = 0;
-
+    
 protected:
     virtual void Read(const Header & hdr,Context * ctx) = 0;
 };
@@ -201,7 +201,7 @@ public:
     std::string GetString (const std::string & key);
     
 protected:
-    virtual void Read(const Header & hdr,Context * ctx);    
+    virtual void Read(const Header & hdr,Context * ctx);
     std::map<std::string, Object*> map;
 };
 

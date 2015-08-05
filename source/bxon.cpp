@@ -176,15 +176,15 @@ void Header::Read(Context * context){
 }
 
 /*
-void Header::Write(Context * context){
-    if(context->Write(sizeof(uint8_t), &type)!=sizeof(uint8_t))
-        throw EXCEPTION_WRITE_FAILURE;
-    if(GetType() == TYPE_STRING || GetType() != FLAG_OBJECT){
-        if(context->Write(sizeof(uint64_t), (uint8_t*)&length)!=sizeof(uint64_t))
-            throw EXCEPTION_WRITE_FAILURE;
-    }
-}
-*/
+ void Header::Write(Context * context){
+ if(context->Write(sizeof(uint8_t), &type)!=sizeof(uint8_t))
+ throw EXCEPTION_WRITE_FAILURE;
+ if(GetType() == TYPE_STRING || GetType() != FLAG_OBJECT){
+ if(context->Write(sizeof(uint64_t), (uint8_t*)&length)!=sizeof(uint64_t))
+ throw EXCEPTION_WRITE_FAILURE;
+ }
+ }
+ */
 
 Object::Object(){
     
@@ -262,7 +262,7 @@ Native * Native::Boolean (bool value){
 Native * Native::Byte (uint8_t value){
     Native * ret = new Native();
     ret->header.SetType(TYPE_BYTE);
-   ret->data = malloc(sizeof(uint8_t));
+    ret->data = malloc(sizeof(uint8_t));
     *((uint8_t*)ret->data) = value;
     return ret;
 }
@@ -375,13 +375,13 @@ void Native::Read(const Header & hdr,Context * ctx){
 }
 
 /*
-void Native::Write(Context * ctx){
-    header.Write(ctx);
-    if(GetType()!=TYPE_NIL && GetLength()>0 && data != NULL)
-        if(ctx->Write((int32_t)GetLength(), (uint8_t*)data)!= GetLength())
-            throw EXCEPTION_WRITE_FAILURE;
-}
-*/
+ void Native::Write(Context * ctx){
+ header.Write(ctx);
+ if(GetType()!=TYPE_NIL && GetLength()>0 && data != NULL)
+ if(ctx->Write((int32_t)GetLength(), (uint8_t*)data)!= GetLength())
+ throw EXCEPTION_WRITE_FAILURE;
+ }
+ */
 
 Native * Native::WithData(NativeType type, void * data, int length){
     Native * ret = new Native();
@@ -413,7 +413,7 @@ NativeArray::~NativeArray(){
         delete (uint8_t*)data;
     data = NULL;
 }
-    
+
 uint32_t NativeArray::GetSize(){
     return size;
 }
@@ -425,7 +425,7 @@ uint32_t NativeArray::GetCapacity(){
 Object * NativeArray::GetObject (int i){
     if(i < 0 && i >= size)
         throw EXCEPTION_ARRAY_OUT_OF_BOUNDS;
-
+    
     int64_t offset = nativeLen * i;
     
     return Native::WithData(GetType(), (uint8_t*)data+offset, nativeLen);
@@ -674,128 +674,128 @@ void ObjectArray::Read(const Header & hdr,Context * ctx){
         Object * obj = Object::Parse(ctx);
         array.push_back(obj);
     }
-
+    
 }
 
 Map::Map(){
-
+    
 }
 
 Map::~Map(){
-	for(std::map<std::string,Object*>::iterator i = map.begin();i!=map.end();i++){
-		Object * obj = i->second;
-		delete obj;
-	}
-	map.clear();
+    for(std::map<std::string,Object*>::iterator i = map.begin();i!=map.end();i++){
+        Object * obj = i->second;
+        delete obj;
+    }
+    map.clear();
 }
-    
+
 uint32_t Map::GetSize(){
-	return (uint32_t)map.size();
+    return (uint32_t)map.size();
 }
 
 std::vector<std::string> Map::GetKeys(){
-	std::vector<std::string> ret;
+    std::vector<std::string> ret;
     ret.reserve(map.size());
-	for(std::map<std::string,Object*>::iterator i = map.begin();i!=map.end();i++){
-		ret.push_back(i->first);
-	}
-	return ret;
+    for(std::map<std::string,Object*>::iterator i = map.begin();i!=map.end();i++){
+        ret.push_back(i->first);
+    }
+    return ret;
 }
-    
+
 bool Map::HasKey (const std::string & key){
-	return map.find(key)!=map.end();
+    return map.find(key)!=map.end();
 }
-    
+
 Object * Map::GetObject (const std::string & key){
-	std::map<std::string,Object*>::iterator i = map.find(key);
-	if(i != map.end())
-		return i->second;
-	return NULL;
+    std::map<std::string,Object*>::iterator i = map.find(key);
+    if(i != map.end())
+        return i->second;
+    return NULL;
 }
 
 Array * Map::GetArray (const std::string & key){
-	std::map<std::string,Object*>::iterator i = map.find(key);
-	if(i != map.end()){
-		if( i->second->GetFlag() == FLAG_ARRAY)
-			return dynamic_cast<Array*>(i->second);
-	}
-	return NULL;
+    std::map<std::string,Object*>::iterator i = map.find(key);
+    if(i != map.end()){
+        if( i->second->GetFlag() == FLAG_ARRAY)
+            return dynamic_cast<Array*>(i->second);
+    }
+    return NULL;
 }
 
 Map * Map::GetMap (const std::string & key){
-	std::map<std::string,Object*>::iterator i = map.find(key);
-	if(i != map.end()){
-		if( i->second->GetFlag() == FLAG_MAP)
-			return dynamic_cast<Map*>(i->second);
-	}
-	return NULL;
+    std::map<std::string,Object*>::iterator i = map.find(key);
+    if(i != map.end()){
+        if( i->second->GetFlag() == FLAG_MAP)
+            return dynamic_cast<Map*>(i->second);
+    }
+    return NULL;
 }
-    
+
 bool Map::IsNil (const std::string & key){
-	Object * obj = GetObject(key);
-	return obj!=NULL && obj->GetType() == TYPE_NIL;
+    Object * obj = GetObject(key);
+    return obj!=NULL && obj->GetType() == TYPE_NIL;
 }
 
 bool Map::GetBoolean (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_BOOLEAN)
-		return dynamic_cast<Native*>(obj)->GetBoolean();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_BOOLEAN)
+        return dynamic_cast<Native*>(obj)->GetBoolean();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 uint8_t Map::GetByte (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_BYTE)
-		return dynamic_cast<Native*>(obj)->GetByte();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_BYTE)
+        return dynamic_cast<Native*>(obj)->GetByte();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 int32_t Map::GetInteger (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_INT)
-		return dynamic_cast<Native*>(obj)->GetInt();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_INT)
+        return dynamic_cast<Native*>(obj)->GetInt();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 int64_t Map::GetLong (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_LONG)
-		return dynamic_cast<Native*>(obj)->GetLong();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_LONG)
+        return dynamic_cast<Native*>(obj)->GetLong();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 float Map::GetFloat (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_FLOAT)
-		return dynamic_cast<Native*>(obj)->GetFloat();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_FLOAT)
+        return dynamic_cast<Native*>(obj)->GetFloat();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 double Map::GetDouble (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_DOUBLE)
-		return dynamic_cast<Native*>(obj)->GetFloat();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_DOUBLE)
+        return dynamic_cast<Native*>(obj)->GetFloat();
+    throw EXCEPTION_WRONG_TYPE;
 }
 
 std::string Map::GetString (const std::string & key){
-	Object * obj = GetObject(key);
-	if(obj!=NULL && obj->GetType() == TYPE_STRING)
-		return dynamic_cast<Native*>(obj)->GetString();
-	throw EXCEPTION_WRONG_TYPE;
+    Object * obj = GetObject(key);
+    if(obj!=NULL && obj->GetType() == TYPE_STRING)
+        return dynamic_cast<Native*>(obj)->GetString();
+    throw EXCEPTION_WRONG_TYPE;
 }
-    
+
 void Map::Read(const Header & hdr,Context * ctx){
-	header = hdr;
-	uint64_t ref = ctx->Tell();
-	while( (ctx->Tell() - ref) < header.GetLength()){
+    header = hdr;
+    uint64_t ref = ctx->Tell();
+    while( (ctx->Tell() - ref) < header.GetLength()){
         
         Header kh;
-		kh.Read(ctx);
+        kh.Read(ctx);
         
-		if(kh.GetType() == TYPE_STRING){
+        if(kh.GetType() == TYPE_STRING){
             Native * native = new Native();
-			dynamic_cast<Object*>(native)->Read(kh,ctx);
+            dynamic_cast<Object*>(native)->Read(kh,ctx);
             
             if(native->GetString().size()>0){
                 Object * obj = Object::Parse(ctx);
@@ -803,9 +803,9 @@ void Map::Read(const Header & hdr,Context * ctx){
                 delete native;
             }
         }else{
-			throw EXCEPTION_WRONG_TYPE;
+            throw EXCEPTION_WRONG_TYPE;
         }
-	}
+    }
 }
 
 std::string Object::ToJSON(){

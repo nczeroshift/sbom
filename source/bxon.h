@@ -17,7 +17,7 @@
 extern "C"
 {
 #endif
-    
+
 // Native Types
 typedef enum{
     BXON_NIL        = 0,
@@ -29,7 +29,7 @@ typedef enum{
     BXON_DOUBLE     = 6,
     BXON_BYTE       = 7,
 } bxon_type;
-    
+
 // Length Flag
 typedef enum{
     BXON_LENGTH_8   = 0x00,
@@ -37,7 +37,7 @@ typedef enum{
     BXON_LENGTH_32  = 0x20,
     BXON_LENGTH_64  = 0x30,
 } bxon_length;
-    
+
 // Object Flag
 typedef enum{
     BXON_OBJECT     = 0x00,
@@ -89,7 +89,7 @@ struct bxon_data_array{
     uint32_t size;
     void * objects;
 };
-    
+
 struct bxon_data_map{
     uint32_t initCapacity;
     uint32_t capacity;
@@ -134,7 +134,7 @@ const char *            bxon_map_get_key    (struct bxon_object * obj, uint32_t 
 
 uint64_t                bxon_write_object   (struct bxon_object * obj, struct bxon_context * ctx);
 struct bxon_object *    bxon_read_object    (struct bxon_context * ctx);
-    
+
 #ifdef __cplusplus
 }
 #endif
