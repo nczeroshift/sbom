@@ -1,14 +1,14 @@
-#bxon
+# bxon
 **B**inary e**X**change **O**bject **N**otation  
 *"Sean Connery binary JSON"*
 
-##About
+## About
 This project is a quick and simple specification to read and write **binary** data in a **JSON** fashion, it's based on **mp4 atom** structure and tries to offer a way to retreive data without full parsing.
 
-##Structure
+## Structure
 Each object contains an header and data. In the header is stored the type tag and length. In data is stored object contents, which may be native or other objects.
 
-####Object
+#### Object
 [ **type** (1 byte), **length** (0 to 8 bytes), **data** (N bytes) ]
 
 ##### Header Type
